@@ -26,8 +26,6 @@ interface ShortcutManager {
 
     fun updateShortcuts()
 
-    fun getShortcut(threadId: Long): ShortcutInfoCompat?
-
-    fun reportShortcutUsed(threadId: Long)
+    fun getOrCreateShortcut(threadId: Long): ShortcutInfoCompat?
 
 }
