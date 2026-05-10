@@ -1,5 +1,10 @@
 [
   {
+    "versionCode": 2239,
+    "versionName": "4.3.7",
+    "fixed": []
+  },
+  {
     "versionCode": 2238,
     "versionName": "4.3.6",
     "fixed": [
