@@ -55,8 +55,10 @@ import dev.octoshrimpy.quik.common.util.extensions.setTint
 import dev.octoshrimpy.quik.common.util.extensions.setVisible
 import dev.octoshrimpy.quik.common.util.extensions.withAlpha
 import dev.octoshrimpy.quik.compat.SubscriptionManagerCompat
+import dev.octoshrimpy.quik.extensions.isImage
 import dev.octoshrimpy.quik.extensions.isSmil
 import dev.octoshrimpy.quik.extensions.isText
+import dev.octoshrimpy.quik.extensions.isVideo
 import dev.octoshrimpy.quik.extensions.joinTo
 import dev.octoshrimpy.quik.extensions.millisecondsToMinutes
 import dev.octoshrimpy.quik.extensions.truncateWithEllipses
@@ -431,6 +433,16 @@ class MessagesAdapter @Inject constructor(
             setData(message, previous, next, holder, audioState)
             contextMenuValue = message.id
             clicks.subscribe(partClicks)    // part clicks gets passed back to compose view model
+        }
+
+        // D-pad: if this message has image/video parts, override the item click so that
+        // pressing D-pad center (which calls performClick on the focused message row) opens
+        // the first image directly — the inner parts RecyclerView is not reachable by D-pad.
+        val imageParts = message.parts.filter { !it.isSmil() && !it.isText() && (it.isImage() || it.isVideo()) }
+        if (imageParts.isNotEmpty() && message.getText(false).isBlank()) {
+            holder.itemView.setOnClickListener {
+                partClicks.onNext(imageParts.first().id)
+            }
         }
 
         showEmojiReactions(reactions, reactionText, message)
