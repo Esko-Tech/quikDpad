@@ -439,7 +439,7 @@ class MessagesAdapter @Inject constructor(
         // pressing D-pad center (which calls performClick on the focused message row) opens
         // the first image directly — the inner parts RecyclerView is not reachable by D-pad.
         val imageParts = message.parts.filter { !it.isSmil() && !it.isText() && (it.isImage() || it.isVideo()) }
-        if (imageParts.isNotEmpty() && message.getText(false).isBlank()) {
+        if (imageParts.isNotEmpty()) {
             holder.itemView.setOnClickListener {
                 partClicks.onNext(imageParts.first().id)
             }
@@ -554,3 +554,4 @@ class MessagesAdapter @Inject constructor(
 
     }
 }
+
