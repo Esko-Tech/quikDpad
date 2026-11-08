@@ -20,6 +20,7 @@ package dev.octoshrimpy.quik.feature.compose
 
 import android.animation.ObjectAnimator
 import android.content.Context
+import android.graphics.Rect
 import android.graphics.Typeface
 import android.net.Uri
 import android.os.Build
@@ -32,6 +33,7 @@ import android.text.style.ClickableSpan
 import android.text.style.StyleSpan
 import android.text.style.URLSpan
 import android.text.util.Linkify
+import android.view.KeyEvent
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -39,6 +41,7 @@ import android.widget.ImageView
 import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.core.net.toUri
+import androidx.recyclerview.widget.RecyclerView
 import com.jakewharton.rxbinding2.view.clicks
 import com.moez.QKSMS.common.QkMediaPlayer
 import dev.octoshrimpy.quik.R
@@ -54,8 +57,10 @@ import dev.octoshrimpy.quik.common.util.extensions.setTint
 import dev.octoshrimpy.quik.common.util.extensions.setVisible
 import dev.octoshrimpy.quik.common.util.extensions.withAlpha
 import dev.octoshrimpy.quik.compat.SubscriptionManagerCompat
+import dev.octoshrimpy.quik.extensions.isImage
 import dev.octoshrimpy.quik.extensions.isSmil
 import dev.octoshrimpy.quik.extensions.isText
+import dev.octoshrimpy.quik.extensions.isVideo
 import dev.octoshrimpy.quik.extensions.joinTo
 import dev.octoshrimpy.quik.extensions.millisecondsToMinutes
 import dev.octoshrimpy.quik.extensions.truncateWithEllipses
@@ -169,6 +174,15 @@ class MessagesAdapter @Inject constructor(
         partContextMenuRegistrar.onNext(parts)
 
         return QkViewHolder(view).apply {
+            // D-pad: message items must be focusable and scroll into view on arrow-key nav.
+            view.isFocusable = true
+            view.isFocusableInTouchMode = false
+            view.setOnFocusChangeListener { v, hasFocus ->
+                if (hasFocus) {
+                    v.requestRectangleOnScreen(Rect(0, 0, v.width, v.height), false)
+                }
+            }
+            view.setOnKeyListener { v, keyCode, event -> event.action == KeyEvent.ACTION_DOWN && scrollWithin(v, keyCode) }
             view.setOnClickListener {
                 getItem(adapterPosition)?.let {
                     when (toggleSelection(it.id, false)) {
@@ -424,7 +438,38 @@ class MessagesAdapter @Inject constructor(
             clicks.subscribe(partClicks)    // part clicks gets passed back to compose view model
         }
 
+        // D-pad: if this message has image/video parts, override the item click so that
+        // pressing D-pad center (which calls performClick on the focused message row) opens
+        // the first image directly — the inner parts RecyclerView is not reachable by D-pad.
+        val imageParts = message.parts.filter { !it.isSmil() && !it.isText() && (it.isImage() || it.isVideo()) }
+        if (imageParts.isNotEmpty()) {
+            holder.itemView.setOnClickListener {
+                partClicks.onNext(imageParts.first().id)
+            }
+        }
+
         showEmojiReactions(reactions, reactionText, message)
+    }
+
+    /**
+     * D-pad: while a message taller than the list is focused, up/down scroll through it a page at a
+     * time. Returns false once its edge is on screen, so focus moves on to the next message as usual.
+     * MessagesLayoutManager keeps the list from jumping back to the message's top meanwhile.
+     */
+    private fun scrollWithin(item: View, keyCode: Int): Boolean {
+        val list = item.parent as? RecyclerView ?: return false
+        val listBottom = list.height - list.paddingBottom
+        val hidden = when (keyCode) {
+            KeyEvent.KEYCODE_DPAD_DOWN -> item.bottom - listBottom
+            KeyEvent.KEYCODE_DPAD_UP -> list.paddingTop - item.top
+            else -> return false
+        }
+        if (hidden <= 0) return false
+
+        val page = (listBottom - list.paddingTop) * 2 / 3
+        val distance = minOf(hidden, page)
+        list.smoothScrollBy(0, if (keyCode == KeyEvent.KEYCODE_DPAD_DOWN) distance else -distance)
+        return true
     }
 
     private fun showEmojiReactions(reactionsContainer: View, reactionTextView: TextView, message: Message) {
@@ -533,3 +578,4 @@ class MessagesAdapter @Inject constructor(
 
     }
 }
+

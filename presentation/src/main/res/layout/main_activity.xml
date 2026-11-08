@@ -24,9 +24,12 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
+    <!-- D-pad: afterDescendants lets arrow keys move focus inside RecyclerView items
+         rather than consuming focus at the ConstraintLayout level. -->
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:descendantFocusability="afterDescendants">
 
         <androidx.appcompat.widget.Toolbar
             android:id="@+id/toolbar"
@@ -61,7 +64,8 @@
                 app:textSize="primary"
                 tools:textSize="16sp"
                 android:focusable="true"
-                android:nextFocusRight="@+id/compose" />
+                android:nextFocusRight="@+id/compose"
+                android:nextFocusDown="@+id/recyclerView" />
         </androidx.appcompat.widget.Toolbar>
 
         <dev.octoshrimpy.quik.common.widget.QkTextView
@@ -85,11 +89,16 @@
             android:clipToPadding="false"
             android:paddingTop="8dp"
             android:paddingBottom="8dp"
+            android:focusable="true"
+            android:nextFocusUp="@+id/toolbarSearch"
             app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
             app:layout_constraintBottom_toTopOf="@id/bottom"
             app:layout_constraintTop_toBottomOf="@id/toolbar"
             tools:listitem="@layout/conversation_list_item" />
 
+        <!-- D-pad: compose FAB is focusable so the user can reach it with arrow keys.
+             nextFocusLeft moves focus back into the conversation list.
+             foreground draws the focus_selector border when selected by keyboard. -->
         <ImageView
             android:id="@+id/compose"
             android:layout_width="56dp"
@@ -100,6 +109,12 @@
             android:elevation="8dp"
             android:padding="16dp"
             android:src="@drawable/ic_add_black_24dp"
+            android:focusable="true"
+            android:focusableInTouchMode="true"
+            android:clickable="true"
+            android:nextFocusLeft="@+id/recyclerView"
+            android:nextFocusUp="@+id/toolbarSearch"
+            android:foreground="@drawable/focus_selector"
             app:layout_constraintBottom_toTopOf="@id/bottom"
             app:layout_constraintEnd_toEndOf="parent"
             tools:backgroundTint="@color/tools_theme"

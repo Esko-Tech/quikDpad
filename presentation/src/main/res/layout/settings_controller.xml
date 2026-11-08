@@ -85,6 +85,17 @@
             app:title="@string/settings_text_size_title" />
 
         <dev.octoshrimpy.quik.common.widget.PreferenceView
+            android:id="@+id/smallScreenScaling"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:visibility="gone"
+            app:icon="@drawable/ic_smartphone_black_24dp"
+            app:summary="@string/settings_small_screen_scaling_summary"
+            app:title="@string/settings_small_screen_scaling_title"
+            app:widget="@layout/settings_switch_widget"
+            tools:visibility="visible" />
+
+        <dev.octoshrimpy.quik.common.widget.PreferenceView
             android:id="@+id/autoColor"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

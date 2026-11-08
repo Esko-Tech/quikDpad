@@ -49,6 +49,9 @@ class Preferences @Inject constructor(
         const val TEXT_SIZE_LARGER = 3
         const val TEXT_SIZE_SUPER = 4
 
+        // Key is shared with SmallScreenScaler, which reads it before injection is available
+        const val SMALL_SCREEN_SCALING = "smallScreenScaling"
+
         const val NOTIFICATION_PREVIEWS_ALL = 0
         const val NOTIFICATION_PREVIEWS_NAME = 1
         const val NOTIFICATION_PREVIEWS_NONE = 2
@@ -112,6 +115,7 @@ class Preferences @Inject constructor(
     val showSttOffsetX = rxPrefs.getFloat("showSttOffsetX", Float.MIN_VALUE)
     val showSttOffsetY = rxPrefs.getFloat("showSttOffsetY", Float.MIN_VALUE)
     val textSize = rxPrefs.getInteger("textSize", TEXT_SIZE_NORMAL)
+    val smallScreenScaling = rxPrefs.getBoolean(SMALL_SCREEN_SCALING, true)
     val blockingManager = rxPrefs.getInteger("blockingManager", BLOCKING_MANAGER_QKSMS)
     val drop = rxPrefs.getBoolean("drop", false)
     val silentNotContact = rxPrefs.getBoolean("silentNotContact", false)

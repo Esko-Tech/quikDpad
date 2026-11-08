@@ -1,4 +1,5 @@
 name: Build and Test on Pull Request
+run-name: "Build and test ${{ github.event.pull_request && format('PR #{0}', github.event.pull_request.number) || github.ref_name }}"
 
 on:
   workflow_dispatch:
