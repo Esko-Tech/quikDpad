@@ -192,6 +192,7 @@ class ComposeActivity : QkThemedActivity(), ComposeView {
             binding.chips.itemAnimator = null
             binding.chips.layoutManager = FlexboxLayoutManager(this)
 
+            binding.messageList.layoutManager = MessagesLayoutManager(this)
             messageAdapter.autoScrollToStart(binding.messageList)
             messageAdapter.emptyView = binding.messagesEmpty
 
