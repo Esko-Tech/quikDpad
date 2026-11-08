@@ -455,6 +455,8 @@ class ComposeActivity : QkThemedActivity(), ComposeView {
         composeAttachmentAdapter.data = state.attachments
 
         binding.attach.animate().rotation(if (state.attaching) 135f else 0f).start()
+        // D-pad: when the menu closes with focus inside it, give focus back to the attach button
+        if (!state.attaching && binding.attaching.hasFocus()) binding.attach.requestFocus()
         binding.attaching.isVisible = state.attaching
 
         binding.shadeBackground.apply {
