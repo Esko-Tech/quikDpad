@@ -68,13 +68,14 @@
         android:layout_height="0dp"
         android:layout_marginBottom="12dp"
         android:paddingTop="8dp"
-        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+        android:nextFocusUp="@+id/toolbarTitle"
         app:layout_constraintBottom_toTopOf="@id/messageBackground"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/sendAsGroupBackground"
-        app:stackFromEnd="true"
-        tools:listitem="@layout/message_list_item_in" />
+        tools:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+        tools:listitem="@layout/message_list_item_in"
+        tools:stackFromEnd="true" />
 
     <dev.octoshrimpy.quik.common.widget.QkTextView
         android:id="@+id/messagesEmpty"
@@ -333,6 +334,8 @@
         app:textSize="tertiary"
         tools:text="108 / 2" />
 
+    <!-- D-pad: send button is the rightmost compose-bar control.
+         nextFocusLeft moves focus back to the message field. -->
     <ImageView
         android:id="@+id/send"
         android:layout_width="44dp"
@@ -343,11 +346,18 @@
         android:padding="10dp"
         android:src="@drawable/ic_send_black_24dp"
         android:visibility="invisible"
+        android:focusable="true"
+        android:focusableInTouchMode="true"
+        android:clickable="true"
+        android:nextFocusLeft="@+id/message"
+        android:foreground="@drawable/focus_selector"
         app:layout_constraintBottom_toBottomOf="@id/messageBackground"
         app:layout_constraintEnd_toEndOf="parent"
         app:tint="?android:textColorSecondary"
         tools:visibility="visible" />
 
+    <!-- D-pad: scheduled-send replaces the normal send button when a schedule is set.
+         Same navigation rules as the regular send button. -->
     <ImageView
         android:id="@+id/scheduledSend"
         android:layout_width="44dp"
@@ -358,6 +368,11 @@
         android:src="@drawable/ic_schedule_send_black_24dp"
         android:padding="10dp"
         android:visibility="gone"
+        android:focusable="true"
+        android:focusableInTouchMode="true"
+        android:clickable="true"
+        android:nextFocusLeft="@+id/message"
+        android:foreground="@drawable/focus_selector"
         app:layout_constraintBottom_toBottomOf="@id/messageBackground"
         app:layout_constraintEnd_toEndOf="parent"
         app:tint="?android:textColorSecondary"
@@ -383,6 +398,10 @@
                 android:id="@+id/toolbarTitle"
                 style="@style/ToolbarText"
                 android:layout_height="wrap_content"
+                android:focusable="true"
+                android:focusableInTouchMode="false"
+                android:foreground="@drawable/focus_selector"
+                android:nextFocusDown="@+id/messageList"
                 android:textDirection="ltr"
                 tools:text="Moez Bhatti" />
 
@@ -414,13 +433,6 @@
         android:background="@drawable/ab_shadow"
         app:layout_constraintTop_toBottomOf="@id/toolbar" />
 
-    <androidx.constraintlayout.widget.Group
-        android:id="@+id/attaching"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:visibility="gone"
-        app:constraint_referenced_ids="contact,contactLabel,schedule,scheduleLabel,attachAFileIcon,attachAFileLabel,attachAnAudioMessageIcon,attachAnAudioMessageLabel,gallery,galleryLabel,camera,cameraLabel" />
-
     <View
         android:id="@+id/shadeBackground"
         android:layout_width="0dp"
@@ -434,211 +446,290 @@
         app:layout_constraintTop_toTopOf="parent"
         tools:visibility="gone" />
 
-    <ImageView
-        android:id="@+id/contact"
-        android:layout_width="40dp"
-        android:layout_height="40dp"
-        android:layout_marginBottom="12dp"
-        android:background="@drawable/circle"
-        android:backgroundTint="@color/tools_theme"
-        android:contentDescription="@string/compose_contact_cd"
-        android:elevation="4dp"
-        android:padding="10dp"
-        android:src="@drawable/ic_person_black_24dp"
-        android:visibility="visible"
-        app:layout_constraintBottom_toTopOf="@id/schedule"
-        app:layout_constraintEnd_toEndOf="@id/attach"
-        app:layout_constraintStart_toStartOf="@id/attach"
-        app:tint="@color/textPrimaryDark" />
-
-    <dev.octoshrimpy.quik.common.widget.QkTextView
-        android:id="@+id/contactLabel"
+    <!-- Attachment overlay. Rows sit just above the attach button and scroll when the screen
+         is too short to show them all; D-pad focus scrolls the focused row into view. -->
+    <ScrollView
+        android:id="@+id/attaching"
         android:layout_width="wrap_content"
-        android:layout_height="32dp"
-        android:layout_marginStart="8dp"
-        android:background="@drawable/rounded_rectangle_4dp"
-        android:backgroundTint="@color/tools_theme"
-        android:elevation="4dp"
-        android:gravity="center_vertical"
-        android:paddingStart="8dp"
-        android:paddingEnd="8dp"
-        android:text="@string/compose_contact_cd"
-        android:textColor="@color/textPrimaryDark"
-        app:layout_constraintBottom_toBottomOf="@id/contact"
-        app:layout_constraintStart_toEndOf="@id/contact"
-        app:layout_constraintTop_toTopOf="@id/contact" />
-
-    <ImageView
-        android:id="@+id/schedule"
-        android:layout_width="40dp"
-        android:layout_height="40dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="2dp"
+        android:layout_marginTop="4dp"
         android:layout_marginBottom="12dp"
-        android:background="@drawable/circle"
-        android:backgroundTint="@color/tools_theme"
-        android:contentDescription="@string/compose_schedule_cd"
         android:elevation="4dp"
-        android:padding="10dp"
-        android:src="@drawable/ic_event_black_24dp"
-        android:visibility="visible"
-        app:layout_constraintBottom_toTopOf="@id/attachAFileIcon"
-        app:layout_constraintEnd_toEndOf="@id/attach"
-        app:layout_constraintStart_toStartOf="@id/attach"
-        app:tint="@color/textPrimaryDark" />
-
-    <dev.octoshrimpy.quik.common.widget.QkTextView
-        android:id="@+id/scheduleLabel"
-        android:layout_width="wrap_content"
-        android:layout_height="32dp"
-        android:layout_marginStart="8dp"
-        android:background="@drawable/rounded_rectangle_4dp"
-        android:backgroundTint="@color/tools_theme"
-        android:elevation="4dp"
-        android:gravity="center_vertical"
-        android:paddingStart="8dp"
-        android:paddingEnd="8dp"
-        android:text="@string/compose_schedule_cd"
-        android:textColor="@color/textPrimaryDark"
-        app:layout_constraintBottom_toBottomOf="@id/schedule"
-        app:layout_constraintStart_toEndOf="@id/schedule"
-        app:layout_constraintTop_toTopOf="@id/schedule" />
-
-    <ImageView
-        android:id="@+id/attachAFileIcon"
-        android:layout_width="40dp"
-        android:layout_height="40dp"
-        android:layout_marginBottom="12dp"
-        android:background="@drawable/circle"
-        android:backgroundTint="@color/tools_theme"
-        android:contentDescription="@string/compose_attach_file_cd"
-        android:elevation="4dp"
-        android:padding="10dp"
-        android:rotation="-45"
-        android:src="@drawable/ic_attachment_black_24dp"
-        android:visibility="visible"
-        app:layout_constraintBottom_toTopOf="@id/attachAnAudioMessageIcon"
-        app:layout_constraintEnd_toEndOf="@id/attach"
-        app:layout_constraintStart_toStartOf="@id/attach"
-        app:tint="@color/textPrimaryDark" />
-
-    <dev.octoshrimpy.quik.common.widget.QkTextView
-        android:id="@+id/attachAFileLabel"
-        android:layout_width="wrap_content"
-        android:layout_height="32dp"
-        android:layout_marginStart="8dp"
-        android:background="@drawable/rounded_rectangle_4dp"
-        android:backgroundTint="@color/tools_theme"
-        android:elevation="4dp"
-        android:gravity="center_vertical"
-        android:paddingStart="8dp"
-        android:paddingEnd="8dp"
-        android:text="@string/compose_attach_file_cd"
-        android:textColor="@color/textPrimaryDark"
-        app:layout_constraintBottom_toBottomOf="@id/attachAFileIcon"
-        app:layout_constraintStart_toEndOf="@id/attachAFileIcon"
-        app:layout_constraintTop_toTopOf="@id/attachAFileIcon" />
-
-    <ImageView
-        android:id="@+id/attachAnAudioMessageIcon"
-        android:layout_width="40dp"
-        android:layout_height="40dp"
-        android:layout_marginBottom="12dp"
-        android:background="@drawable/circle"
-        android:backgroundTint="@color/tools_theme"
-        android:contentDescription="@string/compose_audio_message_cd"
-        android:elevation="4dp"
-        android:padding="10dp"
-        android:src="@android:drawable/ic_btn_speak_now"
-        android:visibility="visible"
-        app:layout_constraintBottom_toTopOf="@id/gallery"
-        app:layout_constraintEnd_toEndOf="@id/attach"
-        app:layout_constraintStart_toStartOf="@id/attach"
-        app:tint="@color/textPrimaryDark" />
-
-    <dev.octoshrimpy.quik.common.widget.QkTextView
-        android:id="@+id/attachAnAudioMessageLabel"
-        android:layout_width="wrap_content"
-        android:layout_height="32dp"
-        android:layout_marginStart="8dp"
-        android:background="@drawable/rounded_rectangle_4dp"
-        android:backgroundTint="@color/tools_theme"
-        android:elevation="4dp"
-        android:gravity="center_vertical"
-        android:paddingStart="8dp"
-        android:paddingEnd="8dp"
-        android:text="@string/compose_audio_message_cd"
-        android:textColor="@color/textPrimaryDark"
-        app:layout_constraintBottom_toBottomOf="@id/attachAnAudioMessageIcon"
-        app:layout_constraintStart_toEndOf="@id/attachAnAudioMessageIcon"
-        app:layout_constraintTop_toTopOf="@id/attachAnAudioMessageIcon" />
-
-    <ImageView
-        android:id="@+id/gallery"
-        android:layout_width="40dp"
-        android:layout_height="40dp"
-        android:layout_marginBottom="12dp"
-        android:background="@drawable/circle"
-        android:backgroundTint="@color/tools_theme"
-        android:contentDescription="@string/compose_gallery_cd"
-        android:elevation="4dp"
-        android:padding="10dp"
-        android:src="@drawable/ic_insert_photo_black_24dp"
-        android:visibility="visible"
-        app:layout_constraintBottom_toTopOf="@id/camera"
-        app:layout_constraintEnd_toEndOf="@id/attach"
-        app:layout_constraintStart_toStartOf="@id/attach"
-        app:tint="@color/textPrimaryDark" />
-
-    <dev.octoshrimpy.quik.common.widget.QkTextView
-        android:id="@+id/galleryLabel"
-        android:layout_width="wrap_content"
-        android:layout_height="32dp"
-        android:layout_marginStart="8dp"
-        android:background="@drawable/rounded_rectangle_4dp"
-        android:backgroundTint="@color/tools_theme"
-        android:elevation="4dp"
-        android:gravity="center_vertical"
-        android:paddingStart="8dp"
-        android:paddingEnd="8dp"
-        android:text="@string/compose_gallery_cd"
-        android:textColor="@color/textPrimaryDark"
-        app:layout_constraintBottom_toBottomOf="@id/gallery"
-        app:layout_constraintStart_toEndOf="@id/gallery"
-        app:layout_constraintTop_toTopOf="@id/gallery" />
-
-    <ImageView
-        android:id="@+id/camera"
-        android:layout_width="40dp"
-        android:layout_height="40dp"
-        android:layout_marginBottom="16dp"
-        android:background="@drawable/circle"
-        android:backgroundTint="@color/tools_theme"
-        android:contentDescription="@string/compose_camera_cd"
-        android:elevation="4dp"
-        android:padding="10dp"
-        android:src="@drawable/ic_camera_alt_black_24dp"
-        android:visibility="visible"
+        android:visibility="gone"
+        app:layout_constrainedHeight="true"
+        app:layout_constrainedWidth="true"
         app:layout_constraintBottom_toTopOf="@id/attach"
-        app:layout_constraintEnd_toEndOf="@id/attach"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0"
         app:layout_constraintStart_toStartOf="@id/attach"
-        app:tint="@color/textPrimaryDark" />
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="1"
+        tools:visibility="visible">
 
-    <dev.octoshrimpy.quik.common.widget.QkTextView
-        android:id="@+id/cameraLabel"
-        android:layout_width="wrap_content"
-        android:layout_height="32dp"
-        android:layout_marginStart="8dp"
-        android:background="@drawable/rounded_rectangle_4dp"
-        android:backgroundTint="@color/tools_theme"
-        android:elevation="4dp"
-        android:gravity="center_vertical"
-        android:paddingStart="8dp"
-        android:paddingEnd="8dp"
-        android:text="@string/compose_camera_cd"
-        android:textColor="@color/textPrimaryDark"
-        app:layout_constraintBottom_toBottomOf="@id/camera"
-        app:layout_constraintStart_toEndOf="@id/gallery"
-        app:layout_constraintTop_toTopOf="@id/camera" />
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
 
+            <!-- D-pad: attachment overlay — contact picker button. -->
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="8dp"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <ImageView
+                    android:id="@+id/contact"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:background="@drawable/circle"
+                    android:backgroundTint="@color/tools_theme"
+                    android:contentDescription="@string/compose_contact_cd"
+                    android:elevation="4dp"
+                    android:padding="10dp"
+                    android:src="@drawable/ic_person_black_24dp"
+                    android:focusable="true"
+                    android:focusableInTouchMode="true"
+                    android:clickable="true"
+                    android:nextFocusDown="@+id/schedule"
+                    android:foreground="@drawable/focus_selector"
+                    app:tint="@color/textPrimaryDark" />
+
+                <dev.octoshrimpy.quik.common.widget.QkTextView
+                    android:id="@+id/contactLabel"
+                    android:layout_width="wrap_content"
+                    android:layout_height="32dp"
+                    android:layout_marginStart="8dp"
+                    android:background="@drawable/rounded_rectangle_4dp"
+                    android:backgroundTint="@color/tools_theme"
+                    android:elevation="4dp"
+                    android:gravity="center_vertical"
+                    android:paddingStart="8dp"
+                    android:paddingEnd="8dp"
+                    android:text="@string/compose_contact_cd"
+                    android:textColor="@color/textPrimaryDark" />
+
+            </LinearLayout>
+
+            <!-- D-pad: schedule picker button in the attachment overlay. -->
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="8dp"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <ImageView
+                    android:id="@+id/schedule"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:background="@drawable/circle"
+                    android:backgroundTint="@color/tools_theme"
+                    android:contentDescription="@string/compose_schedule_cd"
+                    android:elevation="4dp"
+                    android:padding="10dp"
+                    android:src="@drawable/ic_event_black_24dp"
+                    android:focusable="true"
+                    android:focusableInTouchMode="true"
+                    android:clickable="true"
+                    android:nextFocusUp="@+id/contact"
+                    android:nextFocusDown="@+id/attachAFileIcon"
+                    android:foreground="@drawable/focus_selector"
+                    app:tint="@color/textPrimaryDark" />
+
+                <dev.octoshrimpy.quik.common.widget.QkTextView
+                    android:id="@+id/scheduleLabel"
+                    android:layout_width="wrap_content"
+                    android:layout_height="32dp"
+                    android:layout_marginStart="8dp"
+                    android:background="@drawable/rounded_rectangle_4dp"
+                    android:backgroundTint="@color/tools_theme"
+                    android:elevation="4dp"
+                    android:gravity="center_vertical"
+                    android:paddingStart="8dp"
+                    android:paddingEnd="8dp"
+                    android:text="@string/compose_schedule_cd"
+                    android:textColor="@color/textPrimaryDark" />
+
+            </LinearLayout>
+
+            <!-- D-pad: file attachment button in the overlay. -->
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="8dp"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <ImageView
+                    android:id="@+id/attachAFileIcon"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:background="@drawable/circle"
+                    android:backgroundTint="@color/tools_theme"
+                    android:contentDescription="@string/compose_attach_file_cd"
+                    android:elevation="4dp"
+                    android:padding="10dp"
+                    android:rotation="-45"
+                    android:src="@drawable/ic_attachment_black_24dp"
+                    android:focusable="true"
+                    android:focusableInTouchMode="true"
+                    android:clickable="true"
+                    android:nextFocusUp="@+id/schedule"
+                    android:nextFocusDown="@+id/attachAnAudioMessageIcon"
+                    android:foreground="@drawable/focus_selector"
+                    app:tint="@color/textPrimaryDark" />
+
+                <dev.octoshrimpy.quik.common.widget.QkTextView
+                    android:id="@+id/attachAFileLabel"
+                    android:layout_width="wrap_content"
+                    android:layout_height="32dp"
+                    android:layout_marginStart="8dp"
+                    android:background="@drawable/rounded_rectangle_4dp"
+                    android:backgroundTint="@color/tools_theme"
+                    android:elevation="4dp"
+                    android:gravity="center_vertical"
+                    android:paddingStart="8dp"
+                    android:paddingEnd="8dp"
+                    android:text="@string/compose_attach_file_cd"
+                    android:textColor="@color/textPrimaryDark" />
+
+            </LinearLayout>
+
+            <!-- D-pad: audio message attachment button in the overlay. -->
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="8dp"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <ImageView
+                    android:id="@+id/attachAnAudioMessageIcon"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:background="@drawable/circle"
+                    android:backgroundTint="@color/tools_theme"
+                    android:contentDescription="@string/compose_audio_message_cd"
+                    android:elevation="4dp"
+                    android:padding="10dp"
+                    android:src="@android:drawable/ic_btn_speak_now"
+                    android:focusable="true"
+                    android:focusableInTouchMode="true"
+                    android:clickable="true"
+                    android:nextFocusUp="@+id/attachAFileIcon"
+                    android:nextFocusDown="@+id/gallery"
+                    android:foreground="@drawable/focus_selector"
+                    app:tint="@color/textPrimaryDark" />
+
+                <dev.octoshrimpy.quik.common.widget.QkTextView
+                    android:id="@+id/attachAnAudioMessageLabel"
+                    android:layout_width="wrap_content"
+                    android:layout_height="32dp"
+                    android:layout_marginStart="8dp"
+                    android:background="@drawable/rounded_rectangle_4dp"
+                    android:backgroundTint="@color/tools_theme"
+                    android:elevation="4dp"
+                    android:gravity="center_vertical"
+                    android:paddingStart="8dp"
+                    android:paddingEnd="8dp"
+                    android:text="@string/compose_audio_message_cd"
+                    android:textColor="@color/textPrimaryDark" />
+
+            </LinearLayout>
+
+            <!-- D-pad: gallery (photo picker) button in the overlay. -->
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="8dp"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <ImageView
+                    android:id="@+id/gallery"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:background="@drawable/circle"
+                    android:backgroundTint="@color/tools_theme"
+                    android:contentDescription="@string/compose_gallery_cd"
+                    android:elevation="4dp"
+                    android:padding="10dp"
+                    android:src="@drawable/ic_insert_photo_black_24dp"
+                    android:focusable="true"
+                    android:focusableInTouchMode="true"
+                    android:clickable="true"
+                    android:nextFocusUp="@+id/attachAnAudioMessageIcon"
+                    android:nextFocusDown="@+id/camera"
+                    android:foreground="@drawable/focus_selector"
+                    app:tint="@color/textPrimaryDark" />
+
+                <dev.octoshrimpy.quik.common.widget.QkTextView
+                    android:id="@+id/galleryLabel"
+                    android:layout_width="wrap_content"
+                    android:layout_height="32dp"
+                    android:layout_marginStart="8dp"
+                    android:background="@drawable/rounded_rectangle_4dp"
+                    android:backgroundTint="@color/tools_theme"
+                    android:elevation="4dp"
+                    android:gravity="center_vertical"
+                    android:paddingStart="8dp"
+                    android:paddingEnd="8dp"
+                    android:text="@string/compose_gallery_cd"
+                    android:textColor="@color/textPrimaryDark" />
+
+            </LinearLayout>
+
+            <!-- D-pad: camera button — lowest item in overlay, nextFocusDown returns to
+                 the attach/message compose bar. -->
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <ImageView
+                    android:id="@+id/camera"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:background="@drawable/circle"
+                    android:backgroundTint="@color/tools_theme"
+                    android:contentDescription="@string/compose_camera_cd"
+                    android:elevation="4dp"
+                    android:padding="10dp"
+                    android:src="@drawable/ic_camera_alt_black_24dp"
+                    android:focusable="true"
+                    android:focusableInTouchMode="true"
+                    android:clickable="true"
+                    android:nextFocusUp="@+id/gallery"
+                    android:nextFocusDown="@+id/attach"
+                    android:foreground="@drawable/focus_selector"
+                    app:tint="@color/textPrimaryDark" />
+
+                <dev.octoshrimpy.quik.common.widget.QkTextView
+                    android:id="@+id/cameraLabel"
+                    android:layout_width="wrap_content"
+                    android:layout_height="32dp"
+                    android:layout_marginStart="8dp"
+                    android:background="@drawable/rounded_rectangle_4dp"
+                    android:backgroundTint="@color/tools_theme"
+                    android:elevation="4dp"
+                    android:gravity="center_vertical"
+                    android:paddingStart="8dp"
+                    android:paddingEnd="8dp"
+                    android:text="@string/compose_camera_cd"
+                    android:textColor="@color/textPrimaryDark" />
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+    </ScrollView>
+
+    <!-- D-pad: attach button is the leftmost compose-bar control.
+         nextFocusRight moves focus to the message text field. -->
     <ImageView
         android:id="@+id/attach"
         android:layout_width="44dp"
@@ -649,6 +740,11 @@
         android:elevation="4dp"
         android:padding="10dp"
         android:src="@drawable/ic_add_black_24dp"
+        android:focusable="true"
+        android:focusableInTouchMode="true"
+        android:clickable="true"
+        android:nextFocusRight="@+id/message"
+        android:foreground="@drawable/focus_selector"
         app:layout_constraintBottom_toBottomOf="@id/messageBackground"
         app:layout_constraintStart_toStartOf="parent"
         tools:backgroundTint="@color/tools_theme"
@@ -668,6 +764,7 @@
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent" />
 
+    <!-- D-pad: record audio message button replaces send when voice recording is active. -->
     <ImageView
         android:id="@+id/recordAudioMsg"
         android:layout_width="44dp"
@@ -677,6 +774,11 @@
         android:contentDescription="@string/compose_record_audio_msg_cd"
         android:padding="8dp"
         android:src="@android:drawable/ic_btn_speak_now"
+        android:focusable="true"
+        android:focusableInTouchMode="true"
+        android:clickable="true"
+        android:nextFocusLeft="@+id/message"
+        android:foreground="@drawable/focus_selector"
         app:layout_constraintBottom_toBottomOf="@id/messageBackground"
         app:layout_constraintEnd_toEndOf="parent"
         app:tint="?android:textColorSecondary" />
@@ -725,6 +827,11 @@
                 android:layout_gravity="center_vertical"
                 android:layout_marginStart="8dp"
                 android:layout_weight="0"
+                android:focusable="true"
+                android:focusableInTouchMode="false"
+                android:clickable="true"
+                android:foreground="@drawable/focus_selector"
+                android:nextFocusRight="@+id/audioMsgPlayerSeekBar"
                 android:contentDescription="@string/compose_record_audio_msg_play_pause_cd"
                 app:srcCompat="@drawable/exo_controls_play"
                 app:tint="@color/tools_theme" />
@@ -769,6 +876,11 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_vertical"
                 android:layout_weight="1"
+                android:focusable="true"
+                android:focusableInTouchMode="false"
+                android:clickable="true"
+                android:foreground="@drawable/focus_selector"
+                android:nextFocusRight="@+id/audioMsgRecord"
                 android:contentDescription="@string/compose_record_audio_msg_abort_cd"
                 app:layout_constraintStart_toStartOf="parent"
                 app:srcCompat="@drawable/ic_delete_white_24dp"
@@ -792,6 +904,11 @@
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
                     android:background="?android:attr/selectableItemBackgroundBorderless"
+                    android:focusable="true"
+                    android:focusableInTouchMode="false"
+                    android:foreground="@drawable/focus_selector"
+                    android:nextFocusLeft="@+id/audioMsgAbort"
+                    android:nextFocusRight="@+id/audioMsgAttach"
                     app:pauseIcon="@drawable/exo_icon_stop"
                     app:playIcon="@android:drawable/ic_btn_speak_now"
                     app:primaryColor="@color/textPrimaryDark" />
@@ -803,6 +920,11 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_vertical"
                 android:layout_weight="1"
+                android:focusable="true"
+                android:focusableInTouchMode="false"
+                android:clickable="true"
+                android:foreground="@drawable/focus_selector"
+                android:nextFocusLeft="@+id/audioMsgRecord"
                 android:contentDescription="@string/compose_record_audio_msg_attach_cd"
                 android:rotation="135"
                 app:layout_constraintEnd_toEndOf="parent"

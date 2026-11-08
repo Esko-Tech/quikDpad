@@ -25,6 +25,7 @@ import dev.octoshrimpy.quik.common.util.Colors
 import dev.octoshrimpy.quik.common.util.extensions.setVisible
 import dev.octoshrimpy.quik.common.widget.BubbleImageView
 import dev.octoshrimpy.quik.databinding.MmsImagePreviewListItemBinding
+import dev.octoshrimpy.quik.common.util.extensions.dpToPx
 import dev.octoshrimpy.quik.extensions.isImage
 import dev.octoshrimpy.quik.extensions.isVideo
 import dev.octoshrimpy.quik.model.Message
@@ -59,7 +60,8 @@ class ImageBinder @Inject constructor(colors: Colors, private val context: Conte
         }
 
         tryOrNull(true) {
-            GlideApp.with(context).load(part.getUri()).fitCenter().into(binding.thumbnail)
+            val sizePx = 40.dpToPx(context)
+            GlideApp.with(context).load(part.getUri()).centerCrop().override(sizePx, sizePx).into(binding.thumbnail)
         }
     }
 

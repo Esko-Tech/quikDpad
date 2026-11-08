@@ -26,6 +26,7 @@
     android:orientation="vertical"
     tools:context="dev.octoshrimpy.quik.feature.compose.ComposeActivity">
 
+    <!-- D-pad: RecyclerView must be focusable so arrow keys can navigate the contact list. -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/contacts"
         android:layout_width="0dp"
@@ -35,6 +36,8 @@
         android:clipToPadding="false"
         android:paddingTop="8dp"
         android:paddingBottom="8dp"
+        android:focusable="true"
+        android:nextFocusUp="@+id/search"
         app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
@@ -73,6 +76,7 @@
                 android:paddingStart="12dp"
                 android:paddingEnd="12dp"
                 android:textColorHint="?android:attr/textColorTertiary"
+                android:nextFocusDown="@+id/contacts"
                 app:textSize="primary"
                 tools:textSize="16sp" />
 

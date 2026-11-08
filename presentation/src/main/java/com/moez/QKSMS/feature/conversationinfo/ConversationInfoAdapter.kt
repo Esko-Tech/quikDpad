@@ -1,6 +1,7 @@
 package dev.octoshrimpy.quik.feature.conversationinfo
 
 import android.content.Context
+import android.graphics.Rect
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.core.view.isVisible
@@ -30,6 +31,7 @@ class ConversationInfoAdapter @Inject constructor(
     val recipientLongClicks: Subject<Long> = PublishSubject.create()
     val themeClicks: Subject<Long> = PublishSubject.create()
     val nameClicks: Subject<Unit> = PublishSubject.create()
+    val sendAsGroupClicks: Subject<Unit> = PublishSubject.create()
     val notificationClicks: Subject<Unit> = PublishSubject.create()
     val markUnreadClicks: Subject<Unit> = PublishSubject.create()
     val archiveClicks: Subject<Unit> = PublishSubject.create()
@@ -43,6 +45,14 @@ class ConversationInfoAdapter @Inject constructor(
             0 -> {
                 val binding = ConversationRecipientListItemBinding.inflate(inflater, parent, false)
                 QkViewHolder(binding.root).apply {
+                    // D-pad: recipient items must be focusable and scroll into view.
+                    itemView.isFocusable = true
+                    itemView.isFocusableInTouchMode = false
+                    itemView.setOnFocusChangeListener { v, hasFocus ->
+                        if (hasFocus) {
+                            v.requestRectangleOnScreen(Rect(0, 0, v.width, v.height), false)
+                        }
+                    }
                     itemView.setOnClickListener {
                         val item = getItem(adapterPosition) as? ConversationInfoRecipient
                         item?.value?.id?.run(recipientClicks::onNext)
@@ -65,6 +75,7 @@ class ConversationInfoAdapter @Inject constructor(
                 val binding = ConversationInfoSettingsBinding.inflate(inflater, parent, false)
                 QkViewHolder(binding.root).apply {
                     binding.groupName.clicks().subscribe(nameClicks)
+                    binding.sendAsGroup.clicks().subscribe(sendAsGroupClicks)
                     binding.notifications.clicks().subscribe(notificationClicks)
                     binding.markUnread.clicks().subscribe(markUnreadClicks)
                     binding.archive.clicks().subscribe(archiveClicks)
@@ -108,6 +119,13 @@ class ConversationInfoAdapter @Inject constructor(
             is ConversationInfoSettings -> {
                 val binding = ConversationInfoSettingsBinding.bind(holder.itemView)
                 binding.groupName.summary = item.name
+
+                binding.sendAsGroup.setVisible(item.recipients.size > 1)
+                binding.sendAsGroup.checkbox?.isChecked = item.sendAsGroup
+                binding.sendAsGroup.summary = context.getString(when (item.sendAsGroup) {
+                    true -> R.string.compose_send_group_summary_on
+                    false -> R.string.compose_send_group_summary_off
+                })
 
                 binding.notifications.isEnabled = !item.blocked
 

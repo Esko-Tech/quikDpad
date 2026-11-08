@@ -25,6 +25,7 @@ import android.content.res.ColorStateList
 import android.os.Build
 import android.os.Bundle
 import android.view.Gravity
+import android.view.KeyEvent
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
@@ -471,6 +472,44 @@ class MainActivity : QkThemedActivity(), MainView {
 
     override fun onOptionsItemSelected(item: MenuItem) =
         optionsItemIntent.onNext(item.itemId).let { true }
+
+    /**
+     * D-pad / flip-phone: KEYCODE_MENU opens or closes the navigation drawer, providing a
+     * hardware-key alternative to swiping the drawer open.  KEYCODE_BACK closes the drawer
+     * before triggering the normal back-stack pop so users on flip phones can dismiss it
+     * without accidentally leaving the activity.
+     *
+     * All other keys fall through to QkActivity's base handler which converts
+     * DPAD_CENTER / ENTER into performClick() on the focused view.
+     */
+    private fun toggleDrawer(): Boolean {
+        if (binding.drawerLayout.isDrawerOpen(GravityCompat.START)) {
+            binding.drawerLayout.closeDrawer(GravityCompat.START)
+        } else {
+            binding.drawerLayout.openDrawer(GravityCompat.START)
+        }
+        return true
+    }
+
+    override fun dispatchKeyEvent(event: KeyEvent): Boolean {
+        val code = event.keyCode
+        // KEYCODE_MENU fires on ACTION_UP; suppress the DOWN silently so nothing else reacts
+        if (code == KeyEvent.KEYCODE_MENU) {
+            if (event.action == KeyEvent.ACTION_UP) toggleDrawer()
+            return true
+        }
+        if (code == KeyEvent.KEYCODE_SOFT_LEFT && event.action == KeyEvent.ACTION_DOWN) {
+            return toggleDrawer()
+        }
+        // Close drawer on Back before letting the activity handle it
+        if (code == KeyEvent.KEYCODE_BACK && event.action == KeyEvent.ACTION_DOWN) {
+            if (binding.drawerLayout.isDrawerOpen(GravityCompat.START)) {
+                binding.drawerLayout.closeDrawer(GravityCompat.START)
+                return true
+            }
+        }
+        return super.dispatchKeyEvent(event)
+    }
 
     override fun onBackPressed() = backPressedSubject.onNext(NavItem.BACK)
 

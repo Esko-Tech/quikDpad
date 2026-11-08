@@ -1260,6 +1260,7 @@ class ComposeViewModel @Inject constructor(
                 .mergeWith(view.backPressedIntent)
                 .withLatestFrom(state) { _, state ->
                     when {
+                        state.attaching -> newState { copy(attaching = false) }
                         state.selectedMessages > 0 -> view.clearSelection()
                         else -> newState { copy(hasError = true) }
                     }

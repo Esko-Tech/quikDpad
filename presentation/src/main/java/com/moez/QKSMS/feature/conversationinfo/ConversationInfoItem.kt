@@ -12,7 +12,8 @@ sealed class ConversationInfoItem {
         val name: String,
         val recipients: RealmList<Recipient>,
         val archived: Boolean,
-        val blocked: Boolean
+        val blocked: Boolean,
+        val sendAsGroup: Boolean
     ) : ConversationInfoItem()
 
     data class ConversationInfoMedia(val value: MmsPart) : ConversationInfoItem()

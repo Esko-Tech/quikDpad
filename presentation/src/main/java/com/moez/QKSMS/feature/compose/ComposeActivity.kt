@@ -37,6 +37,7 @@ import android.speech.SpeechRecognizer
 import android.text.format.DateFormat
 import android.view.ContextMenu
 import android.view.DragEvent.ACTION_DRAG_ENDED
+import android.view.KeyEvent
 import android.view.DragEvent.ACTION_DRAG_EXITED
 import android.view.DragEvent.ACTION_DROP
 import android.view.Menu
@@ -230,6 +231,7 @@ class ComposeActivity : QkThemedActivity(), ComposeView {
             binding.chips.itemAnimator = null
             binding.chips.layoutManager = FlexboxLayoutManager(this)
 
+            binding.messageList.layoutManager = MessagesLayoutManager(this)
             messageAdapter.autoScrollToStart(binding.messageList)
             messageAdapter.emptyView = binding.messagesEmpty
 
@@ -409,16 +411,6 @@ class ComposeActivity : QkThemedActivity(), ComposeView {
     override fun onStart() {
         super.onStart()
         activityVisibleIntent.onNext(true)
-
-        // if first time stt icon is shown (since setting reset), pop up an instruction toast
-        if (prefs.showStt.get() &&
-            (prefs.showSttOffsetX.get() == Float.MIN_VALUE) &&
-            (prefs.showSttOffsetX.get() == Float.MIN_VALUE)) {
-            makeToast(R.string.compose_toast_drag_stt, Toast.LENGTH_LONG)
-            // reset to new flag value that indicates 'not first time through, but not customised'
-            prefs.showSttOffsetX.set(Float.MAX_VALUE)
-            prefs.showSttOffsetY.set(Float.MAX_VALUE)
-        }
     }
 
     override fun onPause() {
@@ -465,8 +457,6 @@ class ComposeActivity : QkThemedActivity(), ComposeView {
                 && state.query.isEmpty() && state.hasScheduledMessages
         binding.toolbar.menu.findItem(R.id.select_all)?.isVisible = !state.editingMode && (messageAdapter.itemCount > 1) && state.selectedMessages != 0
         binding.toolbar.menu.findItem(R.id.add)?.isVisible = state.editingMode
-        binding.toolbar.menu.findItem(R.id.call)?.isVisible = !state.editingMode && state.selectedMessages == 0
-                && state.query.isEmpty()
         binding.toolbar.menu.findItem(R.id.info)?.isVisible = !state.editingMode && state.selectedMessages == 0
                 && state.query.isEmpty()
         binding.toolbar.menu.findItem(R.id.copy)?.isVisible =
@@ -485,7 +475,9 @@ class ComposeActivity : QkThemedActivity(), ComposeView {
 
         binding.loading.setVisible(state.loading)
 
-        binding.sendAsGroup.setVisible(state.recipientCount > 1)
+        // Only while picking recipients for a new message; existing conversations change this
+        // from conversation info so the banner doesn't take space away from the messages
+        binding.sendAsGroup.setVisible(state.editingMode && state.recipientCount > 1)
         binding.sendAsGroupSwitch.isChecked = state.sendAsGroup
         binding.sendAsGroupSummary.setText(
             if (binding.sendAsGroupSwitch.isChecked) R.string.compose_send_group_summary_on
@@ -503,6 +495,8 @@ class ComposeActivity : QkThemedActivity(), ComposeView {
         composeAttachmentAdapter.data = state.attachments
 
         binding.attach.animate().rotation(if (state.attaching) 135f else 0f).start()
+        // D-pad: when the menu closes with focus inside it, give focus back to the attach button
+        if (!state.attaching && binding.attaching.hasFocus()) binding.attach.requestFocus()
         binding.attaching.isVisible = state.attaching
 
         binding.shadeBackground.apply {
@@ -523,6 +517,8 @@ class ComposeActivity : QkThemedActivity(), ComposeView {
 
         // show or hide audio message recording panel and shade background
         binding.audioMsgBackground.isVisible = state.audioMsgRecording
+        // D-pad: move focus to the record button when the audio overlay becomes visible
+        if (state.audioMsgRecording) binding.audioMsgRecord.requestFocus()
 
         binding.counter.text = state.remaining
         binding.counter.setVisible(binding.counter.text.isNotBlank())
@@ -561,20 +557,6 @@ class ComposeActivity : QkThemedActivity(), ComposeView {
         // if scheduling mode is set, show schedule dialog
         if (state.scheduling)
             scheduleAction.onNext(true)
-
-        // if stt is available and preference is set to show stt button
-        if (isSpeechRecognitionAvailable() && prefs.showStt.get()) {
-            binding.speechToTextFrame.isVisible = true
-
-            val xPercent = prefs.showSttOffsetX.get()
-            val yPercent = prefs.showSttOffsetY.get()
-
-            // if the stt icon has a custom position, move it
-            if ((xPercent != Float.MAX_VALUE) && (yPercent != Float.MAX_VALUE)) {
-                binding.speechToTextFrame.x = (binding.contentView.x + (xPercent * binding.contentView.width))
-                binding.speechToTextFrame.y = (binding.contentView.y + (yPercent * binding.contentView.height))
-            }
-        }
     }
 
     override fun clearSelection() = messageAdapter.clearSelection()
@@ -770,8 +752,22 @@ class ComposeActivity : QkThemedActivity(), ComposeView {
         return true
     }
 
+    override fun dispatchKeyEvent(event: KeyEvent): Boolean {
+        val code = event.keyCode
+        // KEYCODE_MENU fires on ACTION_UP; suppress the DOWN silently
+        if (code == KeyEvent.KEYCODE_MENU) {
+            if (event.action == KeyEvent.ACTION_UP) optionsItemIntent.onNext(R.id.info)
+            return true
+        }
+        if (code == KeyEvent.KEYCODE_SOFT_LEFT && event.action == KeyEvent.ACTION_DOWN) {
+            optionsItemIntent.onNext(R.id.info)
+            return true
+        }
+        return super.dispatchKeyEvent(event)
+    }
+
     override fun getColoredMenuItems(): List<Int> {
-        return super.getColoredMenuItems() + R.id.call
+        return super.getColoredMenuItems()
     }
 
     override fun onCreateContextMenu(
