@@ -40,6 +40,7 @@ import dev.octoshrimpy.quik.common.QkChangeHandler
 import dev.octoshrimpy.quik.common.QkDialog
 import dev.octoshrimpy.quik.common.base.QkController
 import dev.octoshrimpy.quik.common.util.Colors
+import dev.octoshrimpy.quik.common.util.SmallScreenScaler
 import dev.octoshrimpy.quik.common.util.extensions.animateLayoutChanges
 import dev.octoshrimpy.quik.common.util.extensions.setBackgroundTint
 import dev.octoshrimpy.quik.common.util.extensions.setVisible
@@ -107,6 +108,9 @@ class SettingsController : QkController<SettingsControllerBinding, SettingsView,
         messageLinkHandlingDialog.adapter.setData(R.array.messageLinkHandlings, R.array.messageLinkHandling_ids)
 
         binding.about.summary = context.getString(R.string.settings_version, BuildConfig.VERSION_NAME)
+
+        // Only offered on screens narrow enough to be scaled
+        binding.smallScreenScaling.isVisible = SmallScreenScaler.isSmallScreen(context)
     }
 
     override fun onAttach(view: View) {
@@ -168,6 +172,8 @@ class SettingsController : QkController<SettingsControllerBinding, SettingsView,
 
         binding.textSize.summary = state.textSizeSummary
         textSizeDialog.adapter.selectedItem = state.textSizeId
+
+        binding.smallScreenScaling.checkbox?.isChecked = state.smallScreenScalingEnabled
 
         binding.autoColor.checkbox?.isChecked = state.autoColor
 

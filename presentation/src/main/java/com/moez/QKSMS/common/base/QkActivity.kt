@@ -19,6 +19,7 @@
 package dev.octoshrimpy.quik.common.base
 
 import android.annotation.SuppressLint
+import android.content.Context
 import android.os.Bundle
 import android.view.KeyEvent
 import android.view.Menu
@@ -30,6 +31,7 @@ import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import dev.octoshrimpy.quik.R
+import dev.octoshrimpy.quik.common.util.SmallScreenScaler
 import dev.octoshrimpy.quik.util.Preferences
 import io.reactivex.subjects.BehaviorSubject
 import io.reactivex.subjects.Subject
@@ -42,6 +44,10 @@ abstract class QkActivity : AppCompatActivity() {
 
     protected val toolbar: Toolbar? get() = findViewById(R.id.toolbar)
     protected val toolbarTitle: TextView? get() = findViewById(R.id.toolbarTitle)
+
+    override fun attachBaseContext(newBase: Context) {
+        super.attachBaseContext(SmallScreenScaler.wrap(newBase))
+    }
 
     @SuppressLint("InlinedApi")
     override fun onCreate(savedInstanceState: Bundle?) {

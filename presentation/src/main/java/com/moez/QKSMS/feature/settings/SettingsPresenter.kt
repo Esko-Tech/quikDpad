@@ -102,6 +102,9 @@ class SettingsPresenter @Inject constructor(
                     newState { copy(textSizeSummary = textSizeLabels[textSize], textSizeId = textSize) }
                 }
 
+        disposables += prefs.smallScreenScaling.asObservable()
+            .subscribe { enabled -> newState { copy(smallScreenScalingEnabled = enabled) } }
+
         disposables += prefs.autoColor.asObservable()
                 .subscribe { autoColor -> newState { copy(autoColor = autoColor) } }
 
@@ -191,6 +194,8 @@ class SettingsPresenter @Inject constructor(
                         R.id.signature -> view.showSignatureDialog(prefs.signature.get())
 
                         R.id.textSize -> view.showTextSizePicker()
+
+                        R.id.smallScreenScaling -> prefs.smallScreenScaling.set(!prefs.smallScreenScaling.get())
 
                         R.id.autoColor -> {
                             prefs.autoColor.set(!prefs.autoColor.get())
