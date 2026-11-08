@@ -25,7 +25,7 @@ android {
     compileSdk 34
 
     defaultConfig {
-        applicationId 'com.jmtditech.quik'
+        applicationId 'com.eskotech.quikdpad'
         minSdkVersion 23
         targetSdkVersion 33
         versionCode 2239
