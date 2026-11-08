@@ -66,6 +66,8 @@ A special thank you to Jake ([@klinker41](https://github.com/klinker41)) and Luk
 
 A giant thank you to Moez [moezbhatti](https://github.com/moezbhatti) for creating and maintaining QKSMS, of which QUIK would not exist without.
 
+A big thank you to jmtditech ([@JMTDI](https://github.com/JMTDI)) for building most of the D-pad navigation in [quik-dpad](https://github.com/JMTDI/quik-dpad), which makes this app usable on phones with hardware keys.
+
 ## Contact
 
 QUIK is developed and maintained by [Marcos Jones](https://github.com/octoshrimpy).
