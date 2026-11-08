@@ -1,5 +1,5 @@
 name: Release from develop
-run-name: Release from PR #${{ github.event.pull_request.number }}
+run-name: "Release from PR #${{ github.event.pull_request.number }}"
 
 # Merging a pull request from develop into master builds a signed release APK
 # and publishes it as a GitHub release tagged v<versionName>.
